@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Yash Goyal - Portfolio",
-  description: "Minimalist portfolio of Yash Goyal, CS student at DTU.",
+  title: "Yash Goyal — CS'27 @ DTU",
+  description: "Portfolio of Yash Goyal — CS student at Delhi Technological University, developer, and researcher at the intersection of neurology and deep learning.",
+  keywords: ["Yash Goyal", "DTU", "portfolio", "CS student", "web developer", "deep learning"],
+  authors: [{ name: "Yash Goyal" }],
+  openGraph: {
+    title: "Yash Goyal — CS'27 @ DTU",
+    description: "Portfolio of Yash Goyal — developer and researcher.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -13,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-full flex flex-col antialiased bg-black text-white selection:bg-white selection:text-black">
+      <body style={{ background: '#111a12', color: '#e8e4d8' }}>
         {children}
       </body>
     </html>
