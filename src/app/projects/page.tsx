@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /* ─── Inline SVG tech icons ─── */
-type TechKey = "nextjs" | "react" | "typescript" | "nodejs" | "python" | "deeplearning" | "openai" | "langchain" | "langgraph" | "mongodb" | "prisma";
+type TechKey = "nextjs" | "react" | "typescript" | "nodejs" | "python" | "deeplearning" | "openai" | "langchain" | "langgraph" | "mongodb" | "prisma" | "postgresql" | "django" | "firebase";
 
 type TechIconDef = {
   label: string;
@@ -54,6 +54,18 @@ const TECH_ICONS: Record<TechKey, TechIconDef> = {
   prisma: {
     label: "Prisma", color: "#2D3748",
     svg: `<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M21.8068 18.2848L13.5528.7565c-.207-.4382-.639-.7065-1.1286-.7065-.4897 0-.9218.2683-1.1286.7065L2.9287 17.1119c-.1786.3796-.1786.8023.0013 1.1885l1.5569 3.3202c.206.436.6381.7139 1.1286.7139.2097 0 .4166-.0617.598-.1768l6.769-4.3765 6.8002 4.3765c.1815.1151.3884.1768.598.1768.4904 0 .9225-.2779 1.1286-.7139l1.5568-3.3202c.1786-.3862.1786-.8089-.0013-1.1956zM12.4228 17.67l-5.2009-3.3573 5.2009-11.0966 5.2009 11.0966z"/></svg>`,
+  },
+  postgresql: {
+    label: "PostgreSQL",
+    src: "/postgresql-icon.svg",
+  },
+  django: {
+    label: "Django",
+    src: "/django-svgrepo-com.svg",
+  },
+  firebase: {
+    label: "Firebase",
+    src: "/firebase-svgrepo-com.svg",
   },
 };
 

@@ -1,0 +1,187 @@
+
+export const metadata = {
+  title: "I Added Message Queues to Make My App More Reliable. Then They Took It Down.",
+  description:
+    "A real-world engineering retrospective on BullMQ, Redis, the transactional outbox pattern, and the hidden costs of background workers.",
+  date: "2026-10-27",
+  readTime: "7 min read",
+  tags: ["System Design", "Redis", "BullMQ", "Backend"],
+  coverImage: "/images/trendsta-architecture.png",
+};
+
+# I Added Message Queues to Make My App More Reliable. Then They Took It Down.
+
+*What building Trendsta taught me about asynchronous processing, the transactional outbox pattern, and the hidden cost of infrastructure.*
+
+High-Level Design has always interested me, not just from an interview perspective, but out of genuine curiosity about how real systems work.
+
+Recently, I revisited one of my projects, [Trendsta](https://trendsta.in/), a creator intelligence platform that helps creators research content, understand what's working, and decide what to post for maximum growth.
+
+Looking back at its architecture, I found a few decisions I'd make differently today. Here's what happened, what I fixed, and what I learned along the way.
+
+## 1. The First Problem: Doing Too Much Synchronously
+
+Trendsta performs content analysis using external services. Initially, I made a request to start an analysis and waited for the operation to finish.
+
+```js
+const research = await axios.post(url, payload);
+```
+
+This works when the operation is quick, but content analysis can take a while. Keeping the client waiting for a long-running process isn't ideal.
+
+I had a similar issue with welcome emails:
+
+```js
+// User signup complete
+sendWelcomeEmail(userId);
+```
+
+I didn't await the promise because I assumed the email would be sent in the background without any issues.
+
+But there's a fundamental problem with both approaches: **they rely on external services behaving exactly as expected.**
+
+What happens when the service is down? When it takes too long to respond? When a sudden spike in users pushes us beyond its rate limits?
+
+Without proper handling, requests can fail, time out, or overwhelm the external service. And without retries, some operations may never happen.
+
+One principle I've started following in system design is simple:
+
+> Never trust anything outside your system to always work.
+
+## 2. Enter Message Queues
+
+The solution was to decouple the main application from long-running and asynchronous tasks.
+
+Instead of performing an analysis directly inside the request, the backend enqueues a job and returns a response. A separate worker processes that job independently.
+
+The flow looks something like this:
+
+1. The user requests an analysis.
+2. The backend adds an analysis job to a queue.
+3. The API returns immediately instead of waiting for the analysis.
+4. A worker picks up the job and processes it.
+5. The result is stored and made available to the user.
+
+The same approach works for emails and other background tasks.
+
+I implemented this using **BullMQ with Redis hosted on Upstash**.
+
+Queues also gave me a way to handle retries, schedule delayed retries, and control how quickly jobs are processed. Workers can be configured to respect external services' rate limits rather than overwhelming them with requests.
+
+This was a much better architecture. But I had overlooked another problem.
+
+## 3. The Dual-Write Problem
+
+Consider user registration.
+
+I need to create the user in the database and enqueue a welcome email job.
+
+```js
+await prisma.user.create({
+  data: payload,
+});
+
+await queue.add("welcome-email", {
+  userId,
+});
+```
+
+There are two separate operations here: writing to the database and writing to the queue.
+
+What happens if the database operation succeeds, but the server crashes before the job is enqueued?
+
+The user exists, but the welcome email is never sent.
+
+Reversing the order doesn't solve the problem either. The job could be enqueued successfully, followed by a failed database transaction, leaving a job for a user who was never created.
+
+This is known as the **dual-write problem**. Two systems need to be updated consistently, but there is no single atomic transaction covering both.
+
+### The Transactional Outbox Pattern
+
+I addressed this using the transactional outbox pattern.
+
+The idea is to save the business operation and an event describing the work to be done in the same database transaction.
+
+For example:
+
+- Create the user.
+- Insert a welcome-email event into an outbox table.
+- Commit both changes in a single database transaction.
+
+A separate relay process reads pending outbox events and publishes the corresponding jobs to the queue. Once published, the events can be marked as processed.
+
+Now, if the database transaction fails, neither the user nor the outbox event is committed. If it succeeds, the event is persisted and can be published later, even if the application crashes in between.
+
+There are still edge cases to handle, such as a relay crashing after publishing an event but before marking it as processed. This means duplicate delivery is possible, so consumers should be designed to handle duplicates safely.
+
+The outbox pattern doesn't make the entire workflow magically atomic. Instead, it ensures that committed work isn't silently lost and can be retried.
+
+At this point, the architecture looked solid. I had queues, separate workers, and an outbox relay.
+
+Then I ran into a problem I hadn't anticipated.
+
+## 4. How My Queues Took Trendsta Down
+
+My Redis instance was on Upstash's free tier, which had a monthly limit of 500,000 commands.
+
+I hadn't paid much attention to the commands BullMQ executed internally. I was focused on what happened when jobs arrived, not on what happened when there were no jobs.
+
+BullMQ regularly communicates with Redis to check and maintain queue state. Some of these operations involve Lua scripts and multiple Redis commands.
+
+In my setup, I observed roughly six commands every five seconds for each queue.
+
+With two queues, that worked out to approximately:
+
+| Metric | Usage |
+| --- | ---: |
+| Commands per second | 2.4 |
+| Commands per minute | 144 |
+| Commands per hour | 8,640 |
+| Commands per day | 207,360 |
+| Estimated commands per 30-day month | 6.2 million |
+
+**Even with zero jobs being processed, the queues were consuming Redis commands.**
+
+At that rate, the theoretical usage was over six million commands in a 30-day month, far above the 500,000-command allowance.
+
+Eventually, I exhausted the quota. Redis operations began failing, and my workers stopped processing jobs.
+
+I'd introduced queues to make Trendsta more reliable, but the infrastructure supporting those queues had become a failure point.
+
+## 5. What Would I Change?
+
+The first thing I'd reconsider is whether a continuously polling worker is appropriate for a workload with low traffic and a strict Redis command budget.
+
+Some options worth evaluating are:
+
+### 1. Change the Redis Hosting Plan or Provider
+
+A different plan may offer more generous command limits or a pricing model better suited to persistent workers.
+
+### 2. Reduce Unnecessary Queue Activity
+
+Review BullMQ's worker configuration and Redis command usage to see whether polling frequency or other background operations can be reduced safely.
+
+### 3. Explore Event-Driven Worker Activation
+
+Instead of keeping workers active continuously, investigate a design where incoming jobs trigger worker activity. This needs careful handling of concurrency, delivery guarantees, and worker lifecycle management.
+
+The right choice depends on traffic, latency requirements, infrastructure costs, and operational complexity.
+
+And honestly, Trendsta didn't need all of this complexity at its scale. But implementing it helped me understand the trade-offs that aren't obvious when you're just reading about design patterns.
+
+## Final Thoughts
+
+The biggest lesson wasn't that message queues or the transactional outbox pattern are bad ideas.
+
+It was that **every architectural decision introduces its own trade-offs and potential failure points**.
+
+Queues help decouple services, but they introduce infrastructure dependencies. The outbox pattern protects against lost events, but adds a relay and another table to maintain. Background workers improve request latency, but they still need monitoring, capacity planning, and failure handling.
+
+It's easy to draw a clean architecture diagram. It's harder to understand what happens when every component starts interacting with the others under real-world constraints.
+
+That's what I enjoy about High-Level Design: not memorizing patterns for interviews, but building things, breaking them, and understanding why they broke.
+
+I'm still learning, and Trendsta gave me a much better education in distributed systems than a diagram alone ever could.
+
+*Have you run into a similar issue with queues or background workers? I'd love to hear how you approached it.*
