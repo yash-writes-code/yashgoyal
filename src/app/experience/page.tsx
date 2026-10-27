@@ -63,8 +63,9 @@ export default function ExperiencePage() {
           >
             YG
           </Link>
-          <Link href="/" className="nav-pixel-link">← home</Link>
+          <Link href="/" className="nav-pixel-link">home</Link>
           <Link href="/projects" className="nav-pixel-link">projects</Link>
+          <Link href="/experience" className="nav-pixel-link">experience</Link>
           <Link href="/blogs" className="nav-pixel-link">blogs</Link>
         </div>
       </nav>

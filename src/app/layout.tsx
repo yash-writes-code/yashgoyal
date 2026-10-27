@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description: "Portfolio of Yash Goyal — CS student at Delhi Technological University, developer, and researcher at the intersection of neurology and deep learning.",
   keywords: ["Yash Goyal", "DTU", "portfolio", "CS student", "web developer", "deep learning"],
   authors: [{ name: "Yash Goyal" }],
+  icons: {
+    icon: "/me.ico",
+    shortcut: "/me.ico",
+  },
   openGraph: {
     title: "Yash Goyal — CS'27 @ DTU",
     description: "Portfolio of Yash Goyal — developer and researcher.",
