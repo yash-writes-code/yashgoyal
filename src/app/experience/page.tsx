@@ -110,30 +110,29 @@ export default function ExperiencePage() {
       {/* Nav */}
       <nav className="page-header-strip" style={{ position: "sticky", top: 0, zIndex: 50 }}>
         <div
+          className="nav-scroll-container"
           style={{
             maxWidth: 720,
             margin: "0 auto",
-            padding: "0 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
+            padding: "0 16px",
           }}
         >
           <Link
             href="/"
             className="font-pixel"
-            style={{ fontSize: 10, color: "var(--accent)", marginRight: 16, textDecoration: "none" }}
+            style={{ fontSize: 10, color: "var(--accent)", marginRight: 12, textDecoration: "none", flexShrink: 0 }}
           >
             YG
           </Link>
-          <Link href="/" className="nav-pixel-link">home</Link>
-          <Link href="/projects" className="nav-pixel-link">projects</Link>
-          <Link href="/experience" className="nav-pixel-link">experience</Link>
-          <Link href="/blogs" className="nav-pixel-link">blogs</Link>
+          <Link href="/" className="nav-pixel-link" style={{ flexShrink: 0 }}>home</Link>
+          <Link href="/projects" className="nav-pixel-link" style={{ flexShrink: 0 }}>projects</Link>
+          <Link href="/experience" className="nav-pixel-link" style={{ flexShrink: 0 }}>experience</Link>
+          <Link href="/blogs" className="nav-pixel-link" style={{ flexShrink: 0 }}>blogs</Link>
+          <Link href="/activity" className="nav-pixel-link" style={{ flexShrink: 0 }}>activity</Link>
         </div>
       </nav>
 
-      <main style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px 80px" }}>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "32px 16px 64px" }}>
         {/* Page header */}
         <div style={{ marginBottom: 40 }}>
           <div className="pixel-tag" style={{ color: "var(--accent2)", marginBottom: 12 }}>
@@ -165,7 +164,7 @@ export default function ExperiencePage() {
               <div
                 key={exp.company}
                 className="anime-card"
-                style={{ padding: 24, borderLeft: `4px solid ${exp.accent}` }}
+                style={{ padding: "20px 16px", borderLeft: `4px solid ${exp.accent}` }}
                 id={`exp-${exp.company.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
               >
                 <div style={{ marginBottom: 14 }}>

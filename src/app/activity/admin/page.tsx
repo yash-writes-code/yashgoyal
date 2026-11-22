@@ -219,10 +219,10 @@ export default function AdminPage() {
 
   const navJSX = (
     <nav className="page-header-strip" style={{position:"sticky",top:0,zIndex:10}}>
-      <div style={{maxWidth:900,margin:"0 auto",padding:"0 24px",display:"flex",alignItems:"center",gap:4}}>
-        <Link href="/" className="font-pixel" style={{fontSize:10,color:"var(--accent)",marginRight:16,textDecoration:"none"}}>YG</Link>
+      <div className="nav-scroll-container" style={{maxWidth:900,margin:"0 auto",padding:"0 16px"}}>
+        <Link href="/" className="font-pixel" style={{fontSize:10,color:"var(--accent)",marginRight:12,textDecoration:"none",flexShrink:0}}>YG</Link>
         {navLinks.map(l=>(
-          <Link key={l.href} href={l.href} className="nav-pixel-link">{l.label}</Link>
+          <Link key={l.href} href={l.href} className="nav-pixel-link" style={{flexShrink:0}}>{l.label}</Link>
         ))}
       </div>
     </nav>
@@ -239,14 +239,14 @@ export default function AdminPage() {
 
   /* new-category row (input + colors + ADD button) */
   const newCatRow = showNewCat ? (
-    <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+    <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:8}}>
       <input
         type="text"
         value={newCatName}
         onChange={e => setNewCatName(e.target.value)}
         onKeyDown={e => { if (e.key==="Enter") { e.preventDefault(); handleAddCategory(); } }}
         placeholder="Category name"
-        style={IS({flex:"1" as unknown as number})}
+        style={IS({flex:"1 1 160px"})}
       />
       <div style={{display:"flex",gap:3,flexWrap:"wrap",width:88}}>
         {CATEGORY_COLORS.map(c=>(
@@ -317,10 +317,10 @@ export default function AdminPage() {
   return (
     <div className="dot-bg" style={{minHeight:"100vh"}}>
       {navJSX}
-      <main style={{maxWidth:720,margin:"0 auto",padding:"28px 24px 48px"}}>
+      <main style={{maxWidth:720,margin:"0 auto",padding:"24px 16px 48px"}}>
 
         {/* header */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12,marginBottom:20}}>
           <div>
             <h1 className="font-pixel" style={{fontSize:13,color:"var(--text)",marginBottom:5}}>✏️ ACTIVITY ADMIN</h1>
             <p style={{fontSize:12,color:"var(--text-muted)"}}>Log and manage your daily activities</p>
@@ -329,7 +329,7 @@ export default function AdminPage() {
         </div>
 
         {/* tabs */}
-        <div style={{display:"flex",gap:0,marginBottom:24,borderBottom:"2px solid var(--border-dark)"}}>
+        <div style={{display:"flex",gap:0,marginBottom:20,borderBottom:"2px solid var(--border-dark)"}}>
           {(["add","edit"] as const).map(tab=>(
             <button key={tab} onClick={()=>setActiveTab(tab)} className="font-pixel"
               style={{
@@ -346,23 +346,23 @@ export default function AdminPage() {
 
         {/* ───────── ADD TAB ───────── */}
         {activeTab==="add" && (
-          <div className="anime-card" style={{padding:"24px 20px"}}>
+          <div className="anime-card" style={{padding:"20px 16px"}}>
             {/* date */}
-            <div style={{marginBottom:20}}>
+            <div style={{marginBottom:18}}>
               <label className="font-pixel" style={{fontSize:8,color:"var(--text-muted)",display:"block",marginBottom:5}}>DATE</label>
               <input type="date" value={addDate} onChange={e=>setAddDate(e.target.value)} style={IS({maxWidth:220})}/>
             </div>
 
             {/* product-list table */}
             <div style={{marginBottom:16}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 160px 72px 32px",gap:6,marginBottom:6,paddingBottom:4,borderBottom:"1px solid var(--border)"}}>
+              <div className="draft-header-row" style={{marginBottom:6,paddingBottom:4,borderBottom:"1px solid var(--border)"}}>
                 {["ACTIVITY","CATEGORY","HRS",""].map(h=>(
                   <span key={h} className="font-pixel" style={{fontSize:7,color:"var(--text-light)"}}>{h}</span>
                 ))}
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 {draftRows.map((row,i)=>(
-                  <div key={row.id} style={{display:"grid",gridTemplateColumns:"1fr 160px 72px 32px",gap:6,alignItems:"start"}}>
+                  <div key={row.id} className="draft-row-card">
                     <input
                       type="text"
                       value={row.activity}
@@ -370,25 +370,27 @@ export default function AdminPage() {
                       placeholder={`Activity ${i+1}`}
                       style={IS()}
                     />
-                    <select
-                      value={row.categoryId}
-                      onChange={e=>updateDraft(row.id,"categoryId",Number(e.target.value))}
-                      style={IS()}
-                    >
-                      <option value="">— pick —</option>
-                      {categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                    <input
-                      type="number" min="0" max="24" step="0.5"
-                      value={row.hours}
-                      onChange={e=>updateDraft(row.id,"hours",e.target.value)}
-                      placeholder="0.5"
-                      style={IS({textAlign:"center"})}
-                    />
-                    <button type="button" onClick={()=>removeDraftRow(row.id)} title="Remove"
-                      style={{height:36,background:"none",border:"2px solid var(--border-dark)",color:"#e74c3c",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                      ×
-                    </button>
+                    <div className="flex sm:contents gap-2 items-center">
+                      <select
+                        value={row.categoryId}
+                        onChange={e=>updateDraft(row.id,"categoryId",Number(e.target.value))}
+                        style={IS({flex: 1})}
+                      >
+                        <option value="">— pick —</option>
+                        {categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                      <input
+                        type="number" min="0" max="24" step="0.5"
+                        value={row.hours}
+                        onChange={e=>updateDraft(row.id,"hours",e.target.value)}
+                        placeholder="0.5"
+                        style={IS({width: 68, textAlign:"center"})}
+                      />
+                      <button type="button" onClick={()=>removeDraftRow(row.id)} title="Remove"
+                        style={{height:36,width:32,flexShrink:0,background:"none",border:"2px solid var(--border-dark)",color:"#e74c3c",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        ×
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

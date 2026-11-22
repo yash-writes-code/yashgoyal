@@ -233,30 +233,29 @@ export default async function BlogPostPage({ params }: PageProps) {
       {/* Nav */}
       <nav className="page-header-strip" style={{ position: "sticky", top: 0, zIndex: 50 }}>
         <div
+          className="nav-scroll-container"
           style={{
             maxWidth: 720,
             margin: "0 auto",
-            padding: "0 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
+            padding: "0 16px",
           }}
         >
           <Link
             href="/"
             className="font-pixel"
-            style={{ fontSize: 10, color: "var(--accent)", marginRight: 16, textDecoration: "none" }}
+            style={{ fontSize: 10, color: "var(--accent)", marginRight: 12, textDecoration: "none", flexShrink: 0 }}
           >
             YG
           </Link>
-          <Link href="/" className="nav-pixel-link">home</Link>
-          <Link href="/projects" className="nav-pixel-link">projects</Link>
-          <Link href="/experience" className="nav-pixel-link">experience</Link>
-          <Link href="/blogs" className="nav-pixel-link">blogs</Link>
+          <Link href="/" className="nav-pixel-link" style={{ flexShrink: 0 }}>home</Link>
+          <Link href="/projects" className="nav-pixel-link" style={{ flexShrink: 0 }}>projects</Link>
+          <Link href="/experience" className="nav-pixel-link" style={{ flexShrink: 0 }}>experience</Link>
+          <Link href="/blogs" className="nav-pixel-link" style={{ flexShrink: 0 }}>blogs</Link>
+          <Link href="/activity" className="nav-pixel-link" style={{ flexShrink: 0 }}>activity</Link>
         </div>
       </nav>
 
-      <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px 80px" }}>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "32px 16px 64px" }}>
         {/* Back button */}
         <div style={{ marginBottom: 28 }}>
           <Link

@@ -45,46 +45,45 @@ export default function Home() {
   return (
     <div
       className="dot-bg"
-      style={{ height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column" }}
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
     >
       {/* Nav */}
       <nav className="page-header-strip" style={{ flexShrink: 0 }}>
         <div
+          className="nav-scroll-container"
           style={{
             maxWidth: 720,
             margin: "0 auto",
-            padding: "0 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
+            padding: "0 16px",
           }}
         >
           <Link
             href="/"
             className="font-pixel"
-            style={{ fontSize: 10, color: "var(--accent)", marginRight: 16, textDecoration: "none" }}
+            style={{ fontSize: 10, color: "var(--accent)", marginRight: 12, textDecoration: "none", flexShrink: 0 }}
           >
             YG
           </Link>
           {navLinks.map((l) => (
-            <Link key={l.href} href={l.href} className="nav-pixel-link">
+            <Link key={l.href} href={l.href} className="nav-pixel-link" style={{ flexShrink: 0 }}>
               {l.label}
             </Link>
           ))}
         </div>
       </nav>
 
-      {/* Main — fills remaining height */}
+      {/* Main */}
       <main
         style={{
           flex: 1,
           maxWidth: 720,
           width: "100%",
           margin: "0 auto",
-          padding: "28px 24px 16px",
+          padding: "20px 16px 24px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
+          gap: 16,
         }}
       >
         {/* Hero row: avatar + name */}
@@ -92,28 +91,27 @@ export default function Home() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 32,
+            gap: 20,
             flexWrap: "wrap",
           }}
         >
           {/* Avatar */}
-          <div className="float-anim avatar-circle-frame" style={{ width: 120, height: 120 }}>
+          <div className="float-anim avatar-circle-frame" style={{ width: 105, height: 105 }}>
             <img src="/pfp.jpg" alt="Yash Goyal" />
           </div>
 
           {/* Name + subtitle */}
-          <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ flex: 1, minWidth: 160 }}>
             <h1
               className="font-pixel"
               style={{
-                fontSize: "clamp(14px, 3vw, 22px)",
+                fontSize: "clamp(15px, 4vw, 22px)",
                 lineHeight: 1.5,
                 color: "var(--text)",
                 marginBottom: 6,
-                whiteSpace: "nowrap",
               }}
             >
-              <SpreadText text="YASH GOYAL" spreadRadius={70} />
+              <SpreadText text="YASH GOYAL" spreadRadius={60} />
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span className="font-pixel" style={{ fontSize: 10, color: "var(--accent2)" }}>
@@ -131,10 +129,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="pixel-divider" style={{ margin: "14px 0" }} />
+        <div className="pixel-divider" style={{ margin: "4px 0" }} />
 
         {/* Bio */}
-        <div className="anime-card" style={{ padding: "14px 20px" }}>
+        <div className="anime-card" style={{ padding: "14px 18px" }}>
           <p style={{ fontSize: 14, lineHeight: 1.75, color: "var(--text-muted)" }}>
             Hey, I&apos;m <strong style={{ color: "var(--text)" }}>Yash</strong> — a CS undergrad
             at DTU researching the intersection of{" "}
@@ -147,16 +145,10 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="pixel-divider" style={{ margin: "14px 0" }} />
+        <div className="pixel-divider" style={{ margin: "4px 0" }} />
 
         {/* Quick-link cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(5, 1fr)",
-            gap: 12,
-          }}
-        >
+        <div className="quick-links-grid">
           {quickLinks.map((card) =>
             card.external ? (
               <a
@@ -169,7 +161,7 @@ export default function Home() {
               >
                 <span className="card-icon" style={{ fontSize: 22 }}>{card.icon}</span>
                 <span className="card-label" style={{ color: card.accent }}>{card.label}</span>
-                <span style={{ fontSize: 10, color: "var(--text-light)", fontStyle: "italic" }}>
+                <span style={{ fontSize: 10, color: "var(--text-light)", fontStyle: "italic", textAlign: "center" }}>
                   {card.desc}
                 </span>
               </a>
@@ -182,7 +174,7 @@ export default function Home() {
               >
                 <span className="card-icon" style={{ fontSize: 22 }}>{card.icon}</span>
                 <span className="card-label" style={{ color: card.accent }}>{card.label}</span>
-                <span style={{ fontSize: 10, color: "var(--text-light)", fontStyle: "italic" }}>
+                <span style={{ fontSize: 10, color: "var(--text-light)", fontStyle: "italic", textAlign: "center" }}>
                   {card.desc}
                 </span>
               </Link>
@@ -190,10 +182,10 @@ export default function Home() {
           )}
         </div>
 
-        <div className="pixel-divider" style={{ margin: "14px 0" }} />
+        <div className="pixel-divider" style={{ margin: "4px 0" }} />
 
         {/* Social + footer */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {socialLinks.map((s) => (
               <a
