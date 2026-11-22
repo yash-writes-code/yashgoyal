@@ -7,6 +7,7 @@ const navLinks = [
   { label: "projects", href: "/projects" },
   { label: "experience", href: "/experience" },
   { label: "blogs", href: "/blogs" },
+  { label: "activity", href: "/activity" },
 ];
 
 const quickLinks = [
@@ -14,6 +15,7 @@ const quickLinks = [
   { href: "/experience", icon: "💼", label: "Experience", desc: "where i've worked",  accent: "#3a7bd5" },
   { href: "/blogs",      icon: "📖", label: "Blogs",      desc: "thoughts & notes",   accent: "#2eb872" },
   { href: "/YashResume.pdf", icon: "📄", label: "Resume", desc: "download cv",        accent: "#f0a653", external: true },
+  { href: "/activity",      icon: "📊", label: "Activity", desc: "daily log",          accent: "#9b59b6" },
 ];
 
 const socialLinks = [
@@ -151,7 +153,7 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: "repeat(5, 1fr)",
             gap: 12,
           }}
         >
