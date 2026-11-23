@@ -5,6 +5,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date"); // specific date lookup
     const range = searchParams.get("range") || "week";
+    const targetDate = searchParams.get("targetDate") || searchParams.get("currentDate") || null;
 
     // --- single-date mode ---
     if (date) {
@@ -22,7 +23,20 @@ export async function GET(request: Request) {
         WHERE e.date = ${date}
         ORDER BY e.created_at ASC
       `;
-      return Response.json({ entries });
+
+      const categoryTotals = await sql`
+        SELECT
+          c.name,
+          c.color,
+          SUM(e.productive_hours) AS total_hours
+        FROM activity_entries e
+        JOIN activity_categories c ON e.category_id = c.id
+        WHERE e.date = ${date}
+        GROUP BY c.name, c.color
+        ORDER BY total_hours DESC
+      `;
+
+      return Response.json({ entries, categoryTotals });
     }
 
     // --- range mode ---
@@ -30,6 +44,7 @@ export async function GET(request: Request) {
     if (range === "2weeks") days = 14;
     if (range === "month") days = 30;
 
+    // Daily totals for line chart across the requested range
     const dailyTotals = await sql`
       SELECT
         date::text,
@@ -40,32 +55,61 @@ export async function GET(request: Request) {
       ORDER BY date
     `;
 
-    const categoryTotals = await sql`
-      SELECT
-        c.name,
-        c.color,
-        SUM(e.productive_hours) AS total_hours
-      FROM activity_entries e
-      JOIN activity_categories c ON e.category_id = c.id
-      WHERE e.date >= CURRENT_DATE - ${days - 1} * INTERVAL '1 day'
-      GROUP BY c.name, c.color
-      ORDER BY total_hours DESC
-    `;
+    // Category totals ONLY for the current day
+    const categoryTotals = targetDate
+      ? await sql`
+          SELECT
+            c.name,
+            c.color,
+            SUM(e.productive_hours) AS total_hours
+          FROM activity_entries e
+          JOIN activity_categories c ON e.category_id = c.id
+          WHERE e.date = ${targetDate}
+          GROUP BY c.name, c.color
+          ORDER BY total_hours DESC
+        `
+      : await sql`
+          SELECT
+            c.name,
+            c.color,
+            SUM(e.productive_hours) AS total_hours
+          FROM activity_entries e
+          JOIN activity_categories c ON e.category_id = c.id
+          WHERE e.date = CURRENT_DATE
+          GROUP BY c.name, c.color
+          ORDER BY total_hours DESC
+        `;
 
-    const entries = await sql`
-      SELECT
-        e.id,
-        e.date::text,
-        e.productive_hours,
-        e.activity,
-        e.category_id,
-        c.name  AS category,
-        c.color AS category_color
-      FROM activity_entries e
-      JOIN activity_categories c ON e.category_id = c.id
-      WHERE e.date >= CURRENT_DATE - ${days - 1} * INTERVAL '1 day'
-      ORDER BY e.date DESC, e.created_at DESC
-    `;
+    // Individual activities ONLY for the current day
+    const entries = targetDate
+      ? await sql`
+          SELECT
+            e.id,
+            e.date::text,
+            e.productive_hours,
+            e.activity,
+            e.category_id,
+            c.name  AS category,
+            c.color AS category_color
+          FROM activity_entries e
+          JOIN activity_categories c ON e.category_id = c.id
+          WHERE e.date = ${targetDate}
+          ORDER BY e.created_at ASC
+        `
+      : await sql`
+          SELECT
+            e.id,
+            e.date::text,
+            e.productive_hours,
+            e.activity,
+            e.category_id,
+            c.name  AS category,
+            c.color AS category_color
+          FROM activity_entries e
+          JOIN activity_categories c ON e.category_id = c.id
+          WHERE e.date = CURRENT_DATE
+          ORDER BY e.created_at ASC
+        `;
 
     return Response.json({ dailyTotals, categoryTotals, entries });
   } catch (err) {
